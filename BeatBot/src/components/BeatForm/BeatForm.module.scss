@@ -1,0 +1,26 @@
+/* Recommendation area polish (optional) */
+.recommendation {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin-top: 16px;
+}
+
+.track { padding: 10px 0; border-bottom: 1px dashed var(--border); }
+.track:last-child { border-bottom: none; }
+.trackInfo { font-weight: 700; }
+.trackWhy { color: var(--muted); font-size: .95rem; }
+
+/* Buttons already inherit global red theme, but ensure spacing */
+.submitButton, .resetButton {
+  margin-top: 6px;
+}
+
+/* Responsive: collapse to one column on narrow screens */
+@media (max-width: 880px) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+}

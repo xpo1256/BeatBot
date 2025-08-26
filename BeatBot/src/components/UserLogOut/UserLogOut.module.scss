@@ -1,10 +1,28 @@
+/* src/components/UserLogOut/UserLogOut.module.scss */
 .UserLogOut {
-    font-size: 1.5vmin;
-    color: var(--text-light);
-    text-align: center;
-    }
-    
-    .UserLogOut .email {
-      font-size: smaller;
-    }
-    
+  display: grid;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.email {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.btn {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #991b1b;
+  color: #fff;
+}
+.btn:hover {
+  background: #dc2626;
+}

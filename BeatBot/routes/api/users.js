@@ -1,7 +1,7 @@
 // # /api/users
 
 import express from 'express';
-import { checkToken, dataController, apiController } from '../../controllers/api/ai.js';
+import { checkToken, dataController, apiController } from '../../controllers/api/auth.js';
 import ensureLoggedIn from '../../config/ensureLoggedIn.js';
 
 const router = express.Router();

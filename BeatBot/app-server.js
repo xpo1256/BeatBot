@@ -2,12 +2,12 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
+
 import checkToken from './config/checkToken.js';
 import ensureLoggedIn from './config/ensureLoggedIn.js';
 import userRoutes from './routes/api/users.js';
-import itemRoutes from './routes/api/items.js';
-import orderRoutes from './routes/api/orders.js';
 import aiRoutes from './routes/api/ai.js';
+import submissionsRoutes from './routes/api/submissions.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,11 +21,14 @@ app.use((req, res, next) => {
     next()
 })
 
+// health 
+app.get('/health', (_, res) => res.status(200).json({ ok: true }));
+// make req.user available
+app.use(checkToken);
 // API Routes - these must come before the static file serving
 app.use('/api/users', userRoutes);
-app.use('/api/items', checkToken, ensureLoggedIn, itemRoutes);
-app.use('/api/orders', checkToken, ensureLoggedIn, orderRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/submissions', ensureLoggedIn, submissionRoutes);
 
 // Determine which directory to serve static files from
 const staticDir = process.env.NODE_ENV === 'production' ? 'dist' : 'public';
@@ -35,7 +38,7 @@ const indexPath = process.env.NODE_ENV === 'production' ? 'dist/index.html' : 'i
 app.use(express.static(staticDir));
 
 // For React Router - serve index.html for all non-API routes
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
     // Don't serve index.html for API routes
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ error: 'API endpoint not found' });

@@ -1,4 +1,6 @@
 // # call OpenAI, persist result
+import Submission from '../../models/submission.js';
+import Result from '../../models/result.js';
 
 // loads the OPENAI API from .env 
 const apiKey = process.env.OPENAI_API_KEY;
@@ -86,14 +88,50 @@ const response = await fetch("https://api.openai.com/v1/chat/completions", {
 }
 
 // Controller that Express route will call: POST /api/ai/recommend
+// function that takes user input => generate an AI playlist => save it => send it back to the frontend.
 export async function recommend(req, res) {
   try {
-    // 1) Clean form data
+    // Takes the request body (the answers from your React form)
+    // Passes it through validateData to make sure values are valid
     const prefs = validateData(req.body);
-    // 2) Get playlist from OpenAI
+
+    // Calls the helper function getPlaylist, which sends the preferences to OpenAI.
+    // AI responds with a playlist JSON (title, explanation, tracks, metadata).
     const playlist = await getPlaylist(prefs);
-    // 3) Send playlist back to frontend
-    res.json(playlist);
+
+    // If the user is logged in (req.user set by JWT), save the request + result in the database
+    const userId = req.user?._id;
+    let submissionId;
+    if (userId) {
+      try {
+        // Creates a new Submission document => stores what the user asked for (their form answers)
+        const submission = await Submission.create({
+      user: userId,
+      ageGroup: prefs.ageGroup,
+      mood: prefs.mood,
+      activity: prefs.activity,
+      energy: prefs.energy,
+      genres: prefs.genres,
+      language: prefs.language,
+      count: prefs.count
+    });
+    submissionId = submission._id;
+
+        // Creates a new Result document => stores what the AI responded with (the playlist)
+        await Result.create({
+      submission: submission._id,
+      user: userId,
+      title: playlist.title,
+      explanation: playlist.explanation,
+      metadata: playlist.metadata,
+      tracks: playlist.tracks
+    });
+  } catch (dbErr) {
+    console.error('Failed to persist submission/result:', dbErr);
+      }
+    }
+    // If saved, return the playlist plus submissionId.
+    return res.json(submissionId ? { ...playlist, submissionId } : playlist);
   } catch (err) {
     console.error("recommend error:", err);
     res.status(500).json({ error: "recommendation_failed" });
